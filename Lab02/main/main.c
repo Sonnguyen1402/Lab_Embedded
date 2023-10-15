@@ -1,7 +1,4 @@
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <inttypes.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -17,6 +14,7 @@ static void IRAM_ATTR gpio_isr_handler(void* arg)
     xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
 }
 
+// Print ”ESP32” when the button is pressed
 static void button_task(void* arg)
 {
     uint32_t io_num;
@@ -26,8 +24,7 @@ static void button_task(void* arg)
         }
     }
 }
-
-
+// Print group members identifier every second
 static void print_task(){
     while(true) {
         printf("1914237 1914961\n");
@@ -43,6 +40,7 @@ void app_main(void)
     //interrupt of falling edge
     io_conf.intr_type = GPIO_INTR_NEGEDGE;
     //bit mask of the pins, use GPIO5 here
+    //Button is connected to Pin 5
     io_conf.pin_bit_mask = 1ULL<<GPIO_NUM_5;
     //set as input mode
     io_conf.mode = GPIO_MODE_INPUT;
@@ -54,7 +52,7 @@ void app_main(void)
     gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
 
     //start gpio tasks
-    xTaskCreate(button_task, "gpio_task_example", 2048, NULL, 2, NULL);
+    xTaskCreate(button_task, "print ESP", 2048, NULL, 2, NULL);
     xTaskCreate(print_task, "print MSSV", 4096, NULL, 1, NULL);
 
     //install gpio isr service
